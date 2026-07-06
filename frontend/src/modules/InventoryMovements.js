@@ -6,7 +6,9 @@ function InventoryMovements({ movements, permissions, styles }) {
   const [filterProduct, setFilterProduct] = useState("");
   const [filterType, setFilterType] = useState("");
 
-  const safeMovements = Array.isArray(movements) ? movements : [];
+  const safeMovements = useMemo(() => {
+  return Array.isArray(movements) ? movements : [];
+}, [movements]);
 
   // Listas de opciones derivadas de los datos reales (sin estado propio
   // que pueda quedar desincronizado: si "movements" cambia, esto se
