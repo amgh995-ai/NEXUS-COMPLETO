@@ -198,11 +198,11 @@ function App() {
     setCart((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod) => {
     if (cart.length === 0) return alert("Carrito vacío");
 
     try {
-      await api.createSale(token, { items: cart });
+      await api.createSale(token, { items: cart, payment_method: paymentMethod });
       setCart([]);
       await loadSales();
       await refreshInventoryData();
@@ -283,7 +283,7 @@ function App() {
       case "sales_history":
         return { sales, permissions, styles };
       case "movements":
-        return { movements, permissions, styles };
+        return { token, movements, permissions, styles };
       case "branches":
         return {
           branches,
