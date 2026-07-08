@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
@@ -7,7 +8,6 @@ const permission = require("../middlewares/permissionMiddleware");
 const PERMISSIONS = require("../constants/permissions");
 const { getCentralBranchId } = require("../utils/centralBranch");
 
-// VER STOCK ACTUAL DE CUARTO FRÍO
 router.get(
   "/cold-room",
   auth,
@@ -16,15 +16,14 @@ router.get(
     try {
       const [rows] = await db.query(`
         SELECT
-          cr.product_id,
-          p.name AS product_name,
-          cr.quantity,
+          p.id          AS product_id,
+          p.name        AS product_name,
+          COALESCE(cr.quantity, 0) AS quantity,
           cr.updated_at
-        FROM cold_room cr
-        JOIN products p ON p.id = cr.product_id
+        FROM products p
+        LEFT JOIN cold_room cr ON cr.product_id = p.id
         ORDER BY p.name
       `);
-
       res.json(rows);
     } catch (error) {
       console.error("Error obteniendo cuarto frío:", error);
@@ -33,7 +32,6 @@ router.get(
   }
 );
 
-// REGISTRAR PRODUCCIÓN (entra a cuarto frío)
 router.post(
   "/cold-room/production",
   auth,
@@ -53,11 +51,9 @@ router.post(
       const centralBranchId = await getCentralBranchId(conn);
 
       await conn.query(
-        `
-        INSERT INTO cold_room (product_id, quantity)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE quantity = quantity + ?
-        `,
+        `INSERT INTO cold_room (product_id, quantity)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
         [product_id, quantity, quantity]
       );
 
@@ -67,7 +63,6 @@ router.post(
       );
 
       await conn.commit();
-
       res.json({ message: "Producción registrada en cuarto frío" });
     } catch (error) {
       await conn.rollback();
