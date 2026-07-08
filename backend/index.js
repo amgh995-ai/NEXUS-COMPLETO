@@ -12,6 +12,7 @@ const inventoryMovementsRoutes = require("./routes/inventoryMovementsRoutes");
 const coldRoomRoutes = require("./routes/coldRoom");
 const ovenRoutes = require("./routes/oven");
 const dispatchRoutes = require("./routes/dispatch");
+const dailyReportRoutes = require("./routes/dailyReport");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api", inventoryMovementsRoutes);
 app.use("/api", coldRoomRoutes);
 app.use("/api", ovenRoutes);
 app.use("/api", dispatchRoutes);
+app.use("/api", dailyReportRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Nexus funcionando 🚀");
