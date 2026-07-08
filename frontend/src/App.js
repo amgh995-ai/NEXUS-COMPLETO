@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 import Login from "./Login";
 import { api } from "./api";
@@ -314,41 +315,44 @@ function App() {
   const ActiveComponent = activeDef?.component;
 
   return (
-    <div style={styles.page}>
-      <div style={styles.topbar}>
-        <div>
-          <h2 style={styles.topbarTitle}>Nexus 🚀</h2>
-          <span style={styles.topbarUser}>Rol: {role}</span>
+    <>
+      <div style={styles.page}>
+        <div style={styles.topbar}>
+          <div>
+            <h2 style={styles.topbarTitle}>Nexus 🚀</h2>
+            <span style={styles.topbarUser}>Rol: {role}</span>
+          </div>
+
+          <button style={styles.logoutButton} onClick={logout}>
+            Cerrar sesión
+          </button>
         </div>
 
-        <button style={styles.logoutButton} onClick={logout}>
-          Cerrar sesión
-        </button>
+        <div style={styles.moduleContent}>
+          {activeDef ? (
+            <>
+              <button
+                style={styles.backButton}
+                onClick={() => setActiveModule(null)}
+              >
+                ← Volver al menú
+              </button>
+
+              <ActiveComponent {...getModuleProps(activeDef.key)} />
+            </>
+          ) : null}
+        </div>
+
+        {!activeDef && (
+          <Dashboard
+            permissions={permissions}
+            onSelect={setActiveModule}
+            styles={styles}
+          />
+        )}
       </div>
-
-      <div style={styles.moduleContent}>
-        {activeDef ? (
-          <>
-            <button
-              style={styles.backButton}
-              onClick={() => setActiveModule(null)}
-            >
-              ← Volver al menú
-            </button>
-
-            <ActiveComponent {...getModuleProps(activeDef.key)} />
-          </>
-        ) : null}
-      </div>
-
-      {!activeDef && (
-        <Dashboard
-          permissions={permissions}
-          onSelect={setActiveModule}
-          styles={styles}
-        />
-      )}
-    </div>
+      <Analytics />
+    </>
   );
 }
 
