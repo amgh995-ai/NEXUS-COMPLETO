@@ -22,7 +22,26 @@ const allowedOrigins = process.env.FRONTEND_URL
 
 allowedOrigins.push("http://localhost:3000");
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+// Vercel genera un dominio distinto (con hash aleatorio) en cada deploy
+// del frontend. En vez de agregarlos uno a uno a mano, reconocemos
+// automáticamente cualquier dominio de ESTE proyecto de Vercel.
+const vercelProjectPattern = /^https:\/\/nexus-completo-yggd[a-z0-9-]*\.vercel\.app$/;
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Peticiones sin "origin" (health checks, curl, Postman) se permiten
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin) || vercelProjectPattern.test(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origen no permitido por CORS: " + origin));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use("/api", authRoutes);
