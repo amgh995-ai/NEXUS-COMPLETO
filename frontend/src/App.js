@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Analytics } from "@vercel/analytics/react";
 
 import Login from "./Login";
 import { api } from "./api";
@@ -199,11 +198,11 @@ function App() {
     setCart((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod) => {
     if (cart.length === 0) return alert("Carrito vacío");
 
     try {
-      await api.createSale(token, { items: cart });
+      await api.createSale(token, { items: cart, payment_method: paymentMethod });
       setCart([]);
       await loadSales();
       await refreshInventoryData();
@@ -284,7 +283,7 @@ function App() {
       case "sales_history":
         return { sales, permissions, styles };
       case "movements":
-        return { movements, permissions, styles };
+        return { token, movements, permissions, styles };
       case "branches":
         return {
           branches,
@@ -315,45 +314,43 @@ function App() {
   const ActiveComponent = activeDef?.component;
 
   return (
-    <>
-      <div style={styles.page}>
-        <div style={styles.topbar}>
-          <div>
-            <h2 style={styles.topbarTitle}>Nexus 🚀</h2>
-            <span style={styles.topbarUser}>Rol: {role}</span>
-          </div>
-
-          <button style={styles.logoutButton} onClick={logout}>
-            Cerrar sesión
-          </button>
+    <div style={styles.page}>
+      <div style={styles.topbar}>
+        <div>
+          <h2 style={styles.topbarTitle}>Nexus 🚀</h2>
+          <span style={styles.topbarUser}>Rol: {role}</span>
         </div>
 
-        <div style={styles.moduleContent}>
-          {activeDef ? (
-            <>
-              <button
-                style={styles.backButton}
-                onClick={() => setActiveModule(null)}
-              >
-                ← Volver al menú
-              </button>
-
-              <ActiveComponent {...getModuleProps(activeDef.key)} />
-            </>
-          ) : null}
-        </div>
-
-        {!activeDef && (
-          <Dashboard
-            permissions={permissions}
-            onSelect={setActiveModule}
-            styles={styles}
-          />
-        )}
+        <button style={styles.logoutButton} onClick={logout}>
+          Cerrar sesión
+        </button>
       </div>
-      <Analytics />
-    </>
+
+      <div style={styles.moduleContent}>
+        {activeDef ? (
+          <>
+            <button
+              style={styles.backButton}
+              onClick={() => setActiveModule(null)}
+            >
+              ← Volver al menú
+            </button>
+
+            <ActiveComponent {...getModuleProps(activeDef.key)} />
+          </>
+        ) : null}
+      </div>
+
+      {!activeDef && (
+        <Dashboard
+          permissions={permissions}
+          onSelect={setActiveModule}
+          styles={styles}
+        />
+      )}
+    </div>
   );
 }
 
 export default App;
+
